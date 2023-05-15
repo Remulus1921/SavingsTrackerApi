@@ -18,6 +18,10 @@ spring:
         format_sql: true
     database: h2
 
-config:
-  jwt:
-    secret-key: 4D6251655468576D597133743677397A24432646294A404E635266556A586E32
+application:
+  security:
+    jwt:
+      secret-key: 4D6251655468576D597133743677397A24432646294A404E635266556A586E32
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
