@@ -1,5 +1,6 @@
 package com.example.savingstrackerapi.user;
 
+import com.example.savingstrackerapi.model.Saving;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,10 @@ public class User implements UserDetails {
   private String lastname;
   private String email;
   private String password;
+
+  @OneToMany(targetEntity = Saving.class, cascade = CascadeType.ALL)
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  private List<Saving> savingList;
 
   @Enumerated(EnumType.ORDINAL)
   private Role role;
