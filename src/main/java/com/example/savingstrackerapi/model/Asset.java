@@ -1,5 +1,6 @@
 package com.example.savingstrackerapi.model;
 
+import com.example.savingstrackerapi.model.Saving;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,4 +25,13 @@ public class Asset {
   @OneToMany(targetEntity = Saving.class, cascade = CascadeType.ALL)
   @JoinColumn(name = "asset", referencedColumnName = "id")
   List<Saving> savingList;
+
+  @Override
+  public String toString() {
+    return "Asset{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", savingList=" + savingList +
+            '}';
+  }
 }

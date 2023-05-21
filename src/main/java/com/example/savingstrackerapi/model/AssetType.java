@@ -24,4 +24,13 @@ public class AssetType {
   @OneToMany(targetEntity = Asset.class, cascade = CascadeType.ALL)
   @JoinColumn(name = "type", referencedColumnName = "id")
   List<Asset> assetList;
+
+  @Override
+  public String toString() {
+    return "AssetType{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", assetList=" + assetList +
+            '}';
+  }
 }

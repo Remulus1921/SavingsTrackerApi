@@ -19,4 +19,12 @@ public class Saving {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
   private Double amount;
+
+  @Override
+  public String toString() {
+    return "Saving{" +
+            "id=" + id +
+            ", amount=" + amount +
+            '}';
+  }
 }
