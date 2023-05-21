@@ -1,5 +1,6 @@
-package com.example.savingstrackerapi.asset;
+package com.example.savingstrackerapi.repository;
 
+import com.example.savingstrackerapi.model.Asset;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

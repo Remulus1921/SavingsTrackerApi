@@ -1,6 +1,5 @@
-package com.example.savingstrackerapi.asset;
+package com.example.savingstrackerapi.model;
 
-import com.example.savingstrackerapi.saving.Saving;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,23 +14,23 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "assets")
-public class Asset {
+@Table(name = "assets_type")
+public class AssetType {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
   private String name;
 
-  @OneToMany(targetEntity = Saving.class, cascade = CascadeType.ALL)
-  @JoinColumn(name = "asset", referencedColumnName = "id")
-  List<Saving> savingList;
+  @OneToMany(targetEntity = Asset.class, cascade = CascadeType.ALL)
+  @JoinColumn(name = "type", referencedColumnName = "id")
+  List<Asset> assetList;
 
   @Override
   public String toString() {
-    return "Asset{" +
+    return "AssetType{" +
             "id=" + id +
             ", name='" + name + '\'' +
-            ", savingList=" + savingList +
+            ", assetList=" + assetList +
             '}';
   }
 }
