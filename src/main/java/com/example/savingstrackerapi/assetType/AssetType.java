@@ -1,5 +1,6 @@
-package com.example.savingstrackerapi.model;
+package com.example.savingstrackerapi.assetType;
 
+import com.example.savingstrackerapi.asset.Asset;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,10 @@ public class AssetType {
   @OneToMany(targetEntity = Asset.class, cascade = CascadeType.ALL)
   @JoinColumn(name = "type", referencedColumnName = "id")
   List<Asset> assetList;
+
+  public AssetType(String name) {
+    this.name = name;
+  }
 
   @Override
   public String toString() {
