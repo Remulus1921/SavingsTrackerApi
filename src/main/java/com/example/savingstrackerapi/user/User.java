@@ -1,6 +1,6 @@
 package com.example.savingstrackerapi.user;
 
-import com.example.savingstrackerapi.model.Saving;
+import com.example.savingstrackerapi.saving.Saving;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
