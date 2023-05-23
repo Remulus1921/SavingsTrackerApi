@@ -1,5 +1,7 @@
-package com.example.savingstrackerapi.model;
+package com.example.savingstrackerapi.saving;
 
+import com.example.savingstrackerapi.asset.Asset;
+import com.example.savingstrackerapi.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +22,10 @@ public class Saving {
   private UUID id;
   private Double amount;
 
+  @ManyToOne
+  private User user;
+  @ManyToOne
+  private Asset asset;
   @Override
   public String toString() {
     return "Saving{" +

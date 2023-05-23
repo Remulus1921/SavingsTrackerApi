@@ -1,6 +1,5 @@
-package com.example.savingstrackerapi.repository;
+package com.example.savingstrackerapi.asset;
 
-import com.example.savingstrackerapi.model.Asset;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
