@@ -1,6 +1,7 @@
-package com.example.savingstrackerapi.model;
+package com.example.savingstrackerapi.asset;
 
-import com.example.savingstrackerapi.model.Saving;
+import com.example.savingstrackerapi.assetType.AssetType;
+import com.example.savingstrackerapi.saving.Saving;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,8 @@ public class Asset {
   @JoinColumn(name = "asset", referencedColumnName = "id")
   List<Saving> savingList;
 
+  @ManyToOne
+  private AssetType assetType;
   @Override
   public String toString() {
     return "Asset{" +
