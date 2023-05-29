@@ -60,12 +60,12 @@ public class SecurityConfiguration {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
-    corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
-    corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-    corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+    corsConfiguration.setAllowedOrigins(List.of("*"));
+    corsConfiguration.setAllowedHeaders(List.of("*"));
+    corsConfiguration.setAllowedMethods(List.of("*"));
     corsConfiguration.setAllowCredentials(true);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/api/v1/**", corsConfiguration);
+    source.registerCorsConfiguration("/**", corsConfiguration);
 
     return source;
   }
