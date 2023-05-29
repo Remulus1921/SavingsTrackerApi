@@ -2,7 +2,6 @@ package com.example.savingstrackerapi.asset;
 
 import com.example.savingstrackerapi.assetType.AssetTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
