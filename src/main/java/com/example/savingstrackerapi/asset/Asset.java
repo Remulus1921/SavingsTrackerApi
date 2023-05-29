@@ -22,6 +22,7 @@ public class Asset {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
   private String name;
+  private String code;
 
   @OneToMany(targetEntity = Saving.class, cascade = CascadeType.ALL)
   @JoinColumn(name = "asset", referencedColumnName = "id")
@@ -34,6 +35,7 @@ public class Asset {
     return "Asset{" +
             "id=" + id +
             ", name='" + name + '\'' +
+            ", code='" + code + '\'' +
             ", savingList=" + savingList +
             '}';
   }
