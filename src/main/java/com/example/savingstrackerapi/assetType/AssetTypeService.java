@@ -13,9 +13,22 @@ public class AssetTypeService {
   public AssetTypeService(AssetTypeRepository assetTypeRepository) {
     this.assetTypeRepository = assetTypeRepository;
   }
-
-
   public List<AssetType> getAssetTypes() {
     return assetTypeRepository.findAll();
+  }
+
+  public void seedAssetTypes() {
+    AssetType currency = new AssetType(
+            "currency"
+    );
+    AssetType cryptocurrency = new AssetType(
+            "cryptocurrency"
+    );
+    AssetType preciousMetal = new AssetType(
+            "precious metal"
+    );
+    assetTypeRepository.saveAll(
+            List.of(currency, cryptocurrency, preciousMetal)
+    );
   }
 }
