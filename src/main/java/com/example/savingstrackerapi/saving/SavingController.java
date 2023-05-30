@@ -24,8 +24,8 @@ public class SavingController {
   }
 
 //  -----------> TO DO
-  @PostMapping("{userId}")
-  public void postUserSaving(@RequestBody Saving saving, @PathVariable("userId") UUID userId) {
+  @PostMapping
+  public void postUserSaving(@RequestBody String savingJson, HttpServletRequest request) {
     try {
       savingService.addNewSaving(saving, userId);
     } catch (Exception e) {

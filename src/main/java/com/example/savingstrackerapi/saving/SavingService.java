@@ -50,22 +50,54 @@ public class SavingService {
 
     return savingRepository.findUserSavings(user.getId());
   }
-//  ----------> TO DO
-  public void addNewSaving(Saving saving, UUID userId) throws Exception {
-    User user = userRepository.findById(userId).orElse(null);
-    if(user == null){
-      throw new Exception("User with given Id does not exist");
-    }
-
+//  ----------> Done
+  public void addNewSaving(String savingJson, HttpServletRequest request) throws Exception {
+    String userEmail = extractEmail(request);
+    String asset;
+    double amount;
     Saving newSaving = new Saving();
-    newSaving.setAmount(saving.getAmount());
-    newSaving.setUser(user);
-    //newSaving.setAsset(saving.getAsset());
+
+
+    if(userEmail == null) {
+      throw new IllegalStateException("There is no user email in given token");
+    }
+    var user = this.userRepository.findByEmail(userEmail).orElseThrow();
+
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode jsonNode = objectMapper.readTree(savingJson);
+
+      asset = jsonNode.get("Asset").asText();
+      amount = jsonNode.get("Amount").asDouble();
+
+      newSaving.setAmount(amount);
+      newSaving.setUser(user);
+      newSaving.setAsset(assetRepository.findAssetByCode(asset));
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+//    List<Saving> savingList = new ArrayList<>(user.getSavingList());
+//    savingList.add(newSaving);
 
     savingRepository.save(newSaving);
   }
 //  <----------
   public List<Saving> getSavings() {
     return savingRepository.findAll();
+  }
+
+  private String extractEmail(HttpServletRequest request) {
+
+    final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    final String Token;
+    final String userEmail;
+    if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+      throw new IllegalStateException("No user token");
+    }
+    Token = authHeader.substring(7);
+    userEmail = jwtService.extractUsername(Token);
+
+    return userEmail;
   }
 }

@@ -26,11 +26,14 @@ public class Saving {
   private User user;
   @ManyToOne
   private Asset asset;
+
   @Override
   public String toString() {
     return "Saving{" +
             "id=" + id +
             ", amount=" + amount +
+            ", user=" + user +
+            ", asset=" + asset +
             '}';
   }
 }
