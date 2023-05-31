@@ -1,14 +1,8 @@
 spring:
   datasource:
-    url: jdbc:h2:file:~/SavingsTrackerAPI
-    username:
-    password:
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
-      settings:
-        trace: false
+    url: jdbc:postgresql://localhost:5432/savings_tracker
+    username: remo1921
+    password: Remo1921
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -16,7 +10,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    database: h2
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 application:
   security:
