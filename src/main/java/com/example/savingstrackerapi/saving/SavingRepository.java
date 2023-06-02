@@ -10,6 +10,4 @@ import java.util.UUID;
 @Repository
 public interface SavingRepository extends JpaRepository<Saving, UUID> {
 
-  @Query("SELECT s FROM User u JOIN u.savingList s WHERE u.id = ?1")
-  List<Saving> findUserSavings(UUID userId);
 }

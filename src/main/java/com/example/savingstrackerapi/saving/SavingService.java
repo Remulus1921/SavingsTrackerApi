@@ -1,62 +1,62 @@
 package com.example.savingstrackerapi.saving;
 
 import com.example.savingstrackerapi.asset.AssetRepository;
-import com.example.savingstrackerapi.assetType.AssetTypeRepository;
 import com.example.savingstrackerapi.config.JwtService;
 import com.example.savingstrackerapi.user.User;
 import com.example.savingstrackerapi.user.UserRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class SavingService {
   private final SavingRepository savingRepository;
+  private final SavingDtoMapper savingDtoMapper;
   private final AssetRepository assetRepository;
-  private final AssetTypeRepository assetTypeRepository;
   private final UserRepository userRepository;
   private final JwtService jwtService;
 
   @Autowired
   public SavingService(SavingRepository savingRepository,
+                       SavingDtoMapper savingDtoMapper,
                        AssetRepository assetRepository,
-                       AssetTypeRepository assetTypeRepository,
                        UserRepository userRepository,
                        JwtService jwtService) {
     this.savingRepository = savingRepository;
+    this.savingDtoMapper = savingDtoMapper;
     this.assetRepository = assetRepository;
-    this.assetTypeRepository = assetTypeRepository;
     this.userRepository = userRepository;
     this.jwtService = jwtService;
   }
 
-  public List<Saving> getUserSavings(HttpServletRequest request) {
-    final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-    final String Token;
-    final String userEmail;
-    if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
-      throw new IllegalStateException("No user token");
-    }
-    Token = authHeader.substring(7);
-    userEmail = jwtService.extractUsername(Token);
+  public List<SavingDto> getUserSavings(HttpServletRequest request) {
+    String userEmail = extractEmail(request);
     if(userEmail == null) {
       throw new IllegalStateException("There is no user email in given token");
     }
-    var user = this.userRepository.findByEmail(userEmail).orElseThrow();
+    List<SavingDto> savings = new ArrayList<>();
+    User user = this.userRepository.findByEmail(userEmail).orElse(null);
+    if (user != null)
+    {
+      savings = user.getSavingList()
+              .stream().map(savingDtoMapper)
+              .toList();
+    }
 
-    return savingRepository.findUserSavings(user.getId());
+    return savings;
   }
-//  ----------> Done
+
   public void addNewSaving(String savingJson, HttpServletRequest request) throws Exception {
     String userEmail = extractEmail(request);
     String asset;
     double amount;
     Saving newSaving = new Saving();
-
 
     if(userEmail == null) {
       throw new IllegalStateException("There is no user email in given token");
@@ -77,14 +77,19 @@ public class SavingService {
     } catch (Exception e) {
       e.printStackTrace();
     }
-//    List<Saving> savingList = new ArrayList<>(user.getSavingList());
-//    savingList.add(newSaving);
 
     savingRepository.save(newSaving);
   }
-//  <----------
-  public List<Saving> getSavings() {
-    return savingRepository.findAll();
+
+  public List<SavingDto> getSavings() {
+    return savingRepository.findAll()
+            .stream().map(saving -> new SavingDto(
+                    saving.getAmount(),
+                    saving.getAsset().getName(),
+                    saving.getAsset().getCode()
+            ))
+            .toList();
+
   }
 
   private String extractEmail(HttpServletRequest request) {
