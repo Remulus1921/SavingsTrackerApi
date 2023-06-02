@@ -22,8 +22,7 @@ public class AssetType {
   private UUID id;
   private String name;
 
-  @OneToMany(targetEntity = Asset.class, cascade = CascadeType.ALL)
-  @JoinColumn(name = "type", referencedColumnName = "id")
+  @OneToMany(mappedBy = "assetType", cascade = CascadeType.ALL)
   List<Asset> assetList;
 
   public AssetType(String name) {

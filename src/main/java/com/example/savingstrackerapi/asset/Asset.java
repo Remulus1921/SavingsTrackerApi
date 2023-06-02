@@ -24,8 +24,7 @@ public class Asset {
   private String name;
   private String code;
 
-  @OneToMany(targetEntity = Saving.class, cascade = CascadeType.ALL)
-  @JoinColumn(name = "asset", referencedColumnName = "id")
+  @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL)
   List<Saving> savingList;
 
   @ManyToOne

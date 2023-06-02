@@ -31,8 +31,7 @@ public class User implements UserDetails {
   private String email;
   private String password;
 
-  @OneToMany(targetEntity = Saving.class, cascade = CascadeType.ALL)
-  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<Saving> savingList;
 
   @Enumerated(EnumType.ORDINAL)
