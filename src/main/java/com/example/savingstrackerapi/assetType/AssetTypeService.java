@@ -8,13 +8,17 @@ import java.util.List;
 @Service
 public class AssetTypeService {
   private final AssetTypeRepository assetTypeRepository;
+  private final AssetTypeDtoMapper assetTypeDtoMapper;
 
   @Autowired
-  public AssetTypeService(AssetTypeRepository assetTypeRepository) {
+  public AssetTypeService(AssetTypeRepository assetTypeRepository, AssetTypeDtoMapper assetTypeDtoMapper) {
     this.assetTypeRepository = assetTypeRepository;
+    this.assetTypeDtoMapper = assetTypeDtoMapper;
   }
-  public List<AssetType> getAssetTypes() {
-    return assetTypeRepository.findAll();
+  public List<AssetTypeDto> getAssetTypes() {
+    return assetTypeRepository.findAll()
+            .stream().map(assetTypeDtoMapper)
+            .toList();
   }
 
   public void seedAssetTypes() {

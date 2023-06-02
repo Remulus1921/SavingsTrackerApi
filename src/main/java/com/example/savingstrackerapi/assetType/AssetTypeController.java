@@ -16,7 +16,7 @@ public class AssetTypeController {
   }
 
   @GetMapping
-  public List<AssetType> getAssetTypes() {
+  public List<AssetTypeDto> getAssetTypes() {
     return assetTypeService.getAssetTypes();
   }
 
