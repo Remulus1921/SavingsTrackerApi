@@ -15,14 +15,17 @@ public class AssetService {
   private final AssetRepository assetRepository;
   private final AssetTypeRepository assetTypeRepository;
   private final RestTemplate restTemplate;
+  private final AssetDtoMapper assetDtoMapper;
 
   @Autowired
   public AssetService(AssetRepository assetRepository,
                       RestTemplate restTemplate,
-                      AssetTypeRepository assetTypeRepository) {
+                      AssetTypeRepository assetTypeRepository,
+                      AssetDtoMapper assetDtoMapper) {
     this.assetRepository = assetRepository;
     this.restTemplate = restTemplate;
     this.assetTypeRepository = assetTypeRepository;
+    this.assetDtoMapper = assetDtoMapper;
   }
 
   public void seedCurrencyData() {
@@ -51,7 +54,9 @@ public class AssetService {
 
   }
 
-  public List<Asset> getAssets() {
-    return assetRepository.findAll();
+  public List<AssetDto> getAssets(String type) {
+    return assetRepository.findAssetsByAssetType_Name(type)
+            .stream().map(assetDtoMapper)
+            .toList();
   }
 }
