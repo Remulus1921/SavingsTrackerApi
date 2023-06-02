@@ -61,7 +61,7 @@ public class SavingService {
     if(userEmail == null) {
       throw new IllegalStateException("There is no user email in given token");
     }
-    var user = this.userRepository.findByEmail(userEmail).orElseThrow();
+    User user = this.userRepository.findByEmail(userEmail).orElseThrow();
 
     try {
       ObjectMapper objectMapper = new ObjectMapper();
@@ -70,15 +70,25 @@ public class SavingService {
       asset = jsonNode.get("Asset").asText();
       amount = jsonNode.get("Amount").asDouble();
 
-      newSaving.setAmount(amount);
-      newSaving.setUser(user);
-      newSaving.setAsset(assetRepository.findAssetByCode(asset));
+      Saving duplicateSaving = savingRepository.findAll()
+              .stream()
+              .filter(saving -> saving.getAsset().getCode().equals(asset)).findFirst().orElse(null);
+      if(duplicateSaving != null)
+      {
+        duplicateSaving.setAmount(duplicateSaving.getAmount() + amount);
+
+        savingRepository.save(duplicateSaving);
+      } else {
+        newSaving.setAmount(amount);
+        newSaving.setUser(user);
+        newSaving.setAsset(assetRepository.findAssetByCode(asset));
+
+        savingRepository.save(newSaving);
+      }
 
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    savingRepository.save(newSaving);
   }
 
   public List<SavingDto> getSavings() {
@@ -89,7 +99,6 @@ public class SavingService {
                     saving.getAsset().getCode()
             ))
             .toList();
-
   }
 
   public void updateSaving(String savingData, HttpServletRequest request) {
