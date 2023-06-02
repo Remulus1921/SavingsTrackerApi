@@ -92,6 +92,37 @@ public class SavingService {
 
   }
 
+  public void updateSaving(String savingData, HttpServletRequest request) {
+    String userEmail = extractEmail(request);
+    String assetCode;
+    double amount;
+
+    if(userEmail == null) {
+      throw new IllegalStateException("There is no user email in given token");
+    }
+
+    User user = this.userRepository.findByEmail(userEmail).orElseThrow();
+
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode jsonNode = objectMapper.readTree(savingData);
+
+      assetCode = jsonNode.get("Asset").asText();
+      amount = jsonNode.get("Amount").asDouble();
+
+      Saving savingToUpdate = user.getSavingList()
+              .stream()
+              .filter(saving -> saving.getAsset().getCode().equals(assetCode))
+              .findFirst()
+              .orElseThrow();
+
+      savingToUpdate.setAmount(amount);
+      savingRepository.save(savingToUpdate);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   private String extractEmail(HttpServletRequest request) {
 
     final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);

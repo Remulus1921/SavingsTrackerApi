@@ -22,13 +22,19 @@ public class SavingController {
   }
 
   @PostMapping
-  public void postUserSaving(@RequestBody String savingJson, HttpServletRequest request) {
+  public void postUserSaving(@RequestBody String saving, HttpServletRequest request) {
     try {
-      savingService.addNewSaving(savingJson, request);
+      savingService.addNewSaving(saving, request);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
+
+  @PutMapping()
+  public void updateUserSavings(@RequestBody String savingData, HttpServletRequest request) {
+    savingService.updateSaving(savingData, request);
+  }
+
   @GetMapping("/getAll")
   public List<SavingDto> getSavings() {
     return savingService.getSavings();
