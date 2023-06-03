@@ -42,8 +42,8 @@ public class SavingController {
     savingService.updateSaving(savingData, request);
   }
 
-  @GetMapping("/getAll")
-  public List<SavingDto> getSavings() {
-    return savingService.getSavings();
+  @DeleteMapping("{assetCode}")
+  public void deleteSaving(@PathVariable("assetCode") String assetCode, HttpServletRequest request) {
+    savingService.deleteSaving(assetCode, request);
   }
 }

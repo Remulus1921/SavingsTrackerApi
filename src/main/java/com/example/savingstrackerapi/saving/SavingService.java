@@ -161,6 +161,18 @@ public class SavingService {
     }
   }
 
+  public void deleteSaving(String assetCode, HttpServletRequest request) {
+    String userEmail = extractEmail(request);
+    User user = this.userRepository.findByEmail(userEmail).orElseThrow();
+
+    Saving savingToDelete = user.getSavingList()
+            .stream()
+            .filter(saving -> saving.getAsset().getCode().equals(assetCode.toUpperCase()))
+            .findFirst().orElseThrow();
+
+    savingRepository.delete(savingToDelete);
+  }
+
   private String extractEmail(HttpServletRequest request) {
 
     final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
