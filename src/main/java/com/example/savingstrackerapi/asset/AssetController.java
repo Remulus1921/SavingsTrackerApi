@@ -1,5 +1,7 @@
 package com.example.savingstrackerapi.asset;
 
+import com.example.savingstrackerapi.asset.dto.AssetDto;
+import com.example.savingstrackerapi.asset.dto.AssetMonthValueDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,5 +23,10 @@ public class AssetController {
   @GetMapping("{assetType}")
   public List<AssetDto> getAssets(@PathVariable("assetType") String type) {
     return assetService.getAssets(type);
+  }
+
+  @GetMapping("/month/{assetName}")
+  public List<AssetMonthValueDto> getMonthValue(@PathVariable("assetName") String assetName) {
+    return assetService.getMonthValue(assetName);
   }
 }

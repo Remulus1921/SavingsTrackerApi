@@ -1,4 +1,4 @@
-package com.example.savingstrackerapi.saving;
+package com.example.savingstrackerapi.saving.dto;
 
 
 public record SavingDto(

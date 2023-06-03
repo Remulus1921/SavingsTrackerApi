@@ -1,11 +1,11 @@
-package com.example.savingstrackerapi.asset;
+package com.example.savingstrackerapi.asset.response;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class AssetResponse {
+public class AssetResponseCurrency {
   private String table;
   private String no;
   private String effectiveDate;
