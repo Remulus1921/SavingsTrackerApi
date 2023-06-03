@@ -1,5 +1,6 @@
 package com.example.savingstrackerapi.asset;
 
+import com.example.savingstrackerapi.asset.dto.AssetDto;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Function;

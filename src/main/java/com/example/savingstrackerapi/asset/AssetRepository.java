@@ -8,6 +8,7 @@ import java.util.UUID;
 
 @Repository
 public interface AssetRepository extends JpaRepository<Asset, UUID> {
-  Asset findAssetByCode(String name);
+  Asset findAssetByCode(String code);
   List<Asset> findAssetsByAssetType_Name(String assetType);
+  Asset findAssetByName(String name);
 }
