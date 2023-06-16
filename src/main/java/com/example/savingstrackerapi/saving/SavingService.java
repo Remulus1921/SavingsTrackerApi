@@ -89,7 +89,7 @@ public class SavingService {
       case "cryptocurrency":
 
         break;
-      case "precious metal":
+      case "precious_metal":
 
         break;
 

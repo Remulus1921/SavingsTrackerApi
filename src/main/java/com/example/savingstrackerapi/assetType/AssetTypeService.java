@@ -29,7 +29,7 @@ public class AssetTypeService {
             "cryptocurrency"
     );
     AssetType preciousMetal = new AssetType(
-            "precious metal"
+            "precious_metal"
     );
     assetTypeRepository.saveAll(
             List.of(currency, cryptocurrency, preciousMetal)

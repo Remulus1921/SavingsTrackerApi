@@ -5,11 +5,17 @@ import com.example.savingstrackerapi.asset.dto.AssetMonthValueDto;
 import com.example.savingstrackerapi.asset.response.AssetMonthResponseCurrency;
 import com.example.savingstrackerapi.asset.response.AssetResponseCurrency;
 import com.example.savingstrackerapi.assetType.AssetTypeRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +62,23 @@ public class AssetService {
   }
 
   public void seedPreciousMetalData() {
+    Asset zloto = new Asset();
+    zloto.setName("Złoto");
+    zloto.setCode("XAU");
+    zloto.setAssetType(assetTypeRepository.findByName("precious_metal"));
+    assetRepository.save(zloto);
 
+    Asset srebro = new Asset();
+    zloto.setName("Srebro");
+    zloto.setCode("XAG");
+    zloto.setAssetType(assetTypeRepository.findByName("precious_metal"));
+    assetRepository.save(srebro);
+
+    Asset platyna = new Asset();
+    zloto.setName("Platyna");
+    zloto.setCode("XPL");
+    zloto.setAssetType(assetTypeRepository.findByName("precious_metal"));
+    assetRepository.save(platyna);
   }
 
   public List<AssetDto> getAssets(String type) {
@@ -68,28 +90,61 @@ public class AssetService {
   public List<AssetMonthValueDto> getMonthValue(String assetName) {
     Asset asset = assetRepository.findAssetByName(assetName);
     List<AssetMonthValueDto> assetMonthValueDto = new ArrayList<>();
-    String url;
+    String currencyUrl;
+    String precious_metalUrl;
+
+    LocalDate currentDate = LocalDate.now();
+
+    // Odejmowanie 30 dni od obecnej daty
+    LocalDate newDate = currentDate.minusDays(30);
+
+    // Formatowanie daty do żądanego formatu
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    String formattedDatePast = newDate.format(formatter);
+    String formattedDateCurrent = currentDate.format(formatter);
+
 
 
     switch (asset.getAssetType().getName()) {
       case "currency":
-        url = "https://api.nbp.pl/api/exchangerates/rates/c/" + asset.getCode() + "/last/30/?format=json";
-        ResponseEntity<AssetMonthResponseCurrency> response = restTemplate.getForEntity(url, AssetMonthResponseCurrency.class);
-        AssetMonthResponseCurrency assetResponse = response.getBody();
+        currencyUrl = "https://api.nbp.pl/api/exchangerates/rates/c/" + asset.getCode() + "/" +formattedDatePast + "/" + formattedDateCurrent + "/";
+        ResponseEntity<AssetMonthResponseCurrency> responseCurrency = restTemplate.getForEntity(currencyUrl, AssetMonthResponseCurrency.class);
+        AssetMonthResponseCurrency assetResponseCurrency = responseCurrency.getBody();
 
-        assert assetResponse != null;
-        List<AssetMonthResponseCurrency.Rate> rates = assetResponse.getRates();
+        assert assetResponseCurrency != null;
+        List<AssetMonthResponseCurrency.Rate> ratesCurrency = assetResponseCurrency.getRates();
 
-        for (var rate: rates) {
+        for (var rate: ratesCurrency) {
 
-          assetMonthValueDto.add(new AssetMonthValueDto(rate.getEffectiveDate(), rate.getAsk(), rate.getBid()));
+          assetMonthValueDto.add(new AssetMonthValueDto(rate.getEffectiveDate(), rate.getAsk()));
         }
 
         break;
       case "cryptocurrency":
 
         break;
-      case "precious metal":
+      case "precious_metal":
+        precious_metalUrl = "https://api.metalpriceapi.com/v1/timeframe?api_key=5ddd710cdf18ec77141a4d0b38f813bc&start_date="+formattedDatePast +"&end_date="+formattedDateCurrent+"&base=PLN"+"&currencies="+asset.getCode();
+        ResponseEntity<String> responsePrecious_metal = restTemplate.getForEntity(precious_metalUrl, String.class);
+        String responseBody = responsePrecious_metal.getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode jsonNode = null;
+        try {
+          jsonNode = objectMapper.readTree(responseBody);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+        JsonNode ratesNode = jsonNode.get("rates");
+          ratesNode.fields().forEachRemaining(entry -> {
+            String date = entry.getKey();
+            double value = entry.getValue().get(asset.getCode()).asDouble();
+
+            assetMonthValueDto.add(new AssetMonthValueDto(date, value));
+
+          });
+
 
         break;
 
