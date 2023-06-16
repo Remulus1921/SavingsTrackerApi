@@ -69,15 +69,15 @@ public class AssetService {
     assetRepository.save(zloto);
 
     Asset srebro = new Asset();
-    zloto.setName("Srebro");
-    zloto.setCode("XAG");
-    zloto.setAssetType(assetTypeRepository.findByName("precious_metal"));
+    srebro.setName("Srebro");
+    srebro.setCode("XAG");
+    srebro.setAssetType(assetTypeRepository.findByName("precious_metal"));
     assetRepository.save(srebro);
 
     Asset platyna = new Asset();
-    zloto.setName("Platyna");
-    zloto.setCode("XPL");
-    zloto.setAssetType(assetTypeRepository.findByName("precious_metal"));
+    platyna.setName("Platyna");
+    platyna.setCode("XPL");
+    platyna.setAssetType(assetTypeRepository.findByName("precious_metal"));
     assetRepository.save(platyna);
   }
 
@@ -87,8 +87,8 @@ public class AssetService {
             .toList();
   }
 
-  public List<AssetMonthValueDto> getMonthValue(String assetName) {
-    Asset asset = assetRepository.findAssetByName(assetName);
+  public List<AssetMonthValueDto> getMonthValue(String assetCode) {
+    Asset asset = assetRepository.findAssetByCode(assetCode);
     List<AssetMonthValueDto> assetMonthValueDto = new ArrayList<>();
     String currencyUrl;
     String precious_metalUrl;
@@ -141,7 +141,7 @@ public class AssetService {
             String date = entry.getKey();
             double value = entry.getValue().get(asset.getCode()).asDouble();
 
-            assetMonthValueDto.add(new AssetMonthValueDto(date, value));
+            assetMonthValueDto.add(new AssetMonthValueDto(date, 1/value));
 
           });
 
