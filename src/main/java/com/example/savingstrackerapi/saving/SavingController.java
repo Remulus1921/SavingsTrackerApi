@@ -23,8 +23,8 @@ public class SavingController {
     return savingService.getUserSavings(request);
   }
 
-  @GetMapping("{assetName}")
-  public SavingValueDto getSavingValue(@PathVariable("assetName") String assetName, HttpServletRequest request) {
+  @GetMapping("{assetCode}")
+  public SavingValueDto getSavingValue(@PathVariable("assetCode") String assetName, HttpServletRequest request) {
     return savingService.getSavingValue(assetName, request);
   }
 

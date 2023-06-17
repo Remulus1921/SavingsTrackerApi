@@ -25,8 +25,8 @@ public class AssetController {
     return assetService.getAssets(type);
   }
 
-  @GetMapping("/month/{assetName}")
-  public List<AssetMonthValueDto> getMonthValue(@PathVariable("assetName") String assetName) {
-    return assetService.getMonthValue(assetName);
+  @GetMapping("/month/{assetCode}")
+  public List<AssetMonthValueDto> getMonthValue(@PathVariable("assetCode") String assetCode) {
+    return assetService.getMonthValue(assetCode);
   }
 }

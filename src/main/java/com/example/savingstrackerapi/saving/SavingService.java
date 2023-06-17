@@ -1,12 +1,14 @@
 package com.example.savingstrackerapi.saving;
 
 import com.example.savingstrackerapi.asset.AssetRepository;
+import com.example.savingstrackerapi.asset.dto.AssetMonthValueDto;
 import com.example.savingstrackerapi.config.JwtService;
 import com.example.savingstrackerapi.saving.dto.SavingDto;
 import com.example.savingstrackerapi.saving.dto.SavingValueDto;
 import com.example.savingstrackerapi.asset.response.AssetMonthResponseCurrency;
 import com.example.savingstrackerapi.user.User;
 import com.example.savingstrackerapi.user.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +18,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.example.savingstrackerapi.asset.response.AssetMonthResponseCurrency.*;
 
@@ -64,12 +71,13 @@ public class SavingService {
     String userEmail = extractEmail(request);
     User user = this.userRepository.findByEmail(userEmail).orElseThrow();
     String url;
-    SavingValueDto savingValueDto = null;
+    String precious_metalUrl;
     Saving saving = user.getSavingList()
             .stream()
-            .filter(s -> s.getAsset().getName().equals(assetName))
+            .filter(s -> s.getAsset().getCode().equals(assetName))
             .findFirst()
             .orElseThrow();
+    ObjectMapper objectMapper = new ObjectMapper();
 
     switch (saving.getAsset().getAssetType().getName()) {
       case "currency":
@@ -80,22 +88,85 @@ public class SavingService {
         assert savingResponse != null;
         List<Rate> rates = savingResponse.getRates();
 
-        savingValueDto = new SavingValueDto(saving.getAsset().getName(),
-                                            saving.getAmount(),
-                                            (saving.getAmount()*rates.get(0).getAsk()),
-                                            rates.get(0).getAsk(),
-                                            rates.get(0).getEffectiveDate());
-        break;
+        return new SavingValueDto(saving.getAsset().getName(),
+                saving.getAmount(),
+                (saving.getAmount() * rates.get(0).getAsk()),
+                rates.get(0).getAsk(),
+                rates.get(0).getEffectiveDate());
       case "cryptocurrency":
+        AtomicReference<Double> USD = new AtomicReference<>((double) 4);
+        String cryptocurrencyApiUrl = "https://api.coincap.io/v2/rates/"+saving.getAsset().getName();
+        ResponseEntity<String> responseCryptocurrency = restTemplate.getForEntity(cryptocurrencyApiUrl, String.class);
+        String responseBodyCryptocurrency = responseCryptocurrency.getBody();
 
-        break;
-      case "precious metal":
+        String usd_url = "http://api.nbp.pl/api/exchangerates/rates/c/usd/last/1/?format=json";
+        ResponseEntity<String> usdResp = restTemplate.getForEntity(usd_url, String.class);
+        String usdBody = usdResp.getBody();
 
-        break;
+        try {
+          JsonNode usdNode = objectMapper.readTree(usdBody);
+          JsonNode usdRatesNode = usdNode.get("rates");
+          usdRatesNode.fields().forEachRemaining(entry -> {
+            JsonNode usdValue = usdRatesNode.get("ask");
+            USD.set(usdValue.asDouble());
+          });
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
 
+        JsonNode jsonNodeCryptocurrency = null;
+        try {
+          jsonNodeCryptocurrency = objectMapper.readTree(responseBodyCryptocurrency);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+        JsonNode dataNode = jsonNodeCryptocurrency.get("data");
+        double finalUSD = USD.get();
+        double valueCrypto = dataNode.get("rateUsd").asDouble();
+
+        JsonNode timestampJsonCrypto = jsonNodeCryptocurrency.get("timestamp");
+        long timestampCrypto = Long.parseLong(timestampJsonCrypto.asText());
+        Date dateCrypto = new Date(timestampCrypto);
+        SimpleDateFormat dateFormatCrypto = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDateCrypto = dateFormatCrypto.format(dateCrypto);
+
+
+        return new SavingValueDto(
+                saving.getAsset().getName(),
+                saving.getAmount(),
+                saving.getAmount() * valueCrypto * finalUSD,
+                valueCrypto,
+                formattedDateCrypto);
+      case "precious_metal":
+        precious_metalUrl = "https://api.metalpriceapi.com/v1/latest?api_key=5ddd710cdf18ec77141a4d0b38f813bc&base=PLN&currencies="+saving.getAsset().getCode();
+        ResponseEntity<String> responsePrecious_metal = restTemplate.getForEntity(precious_metalUrl, String.class);
+        String responseBody = responsePrecious_metal.getBody();
+        JsonNode jsonNode = null;
+        try {
+          jsonNode = objectMapper.readTree(responseBody);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+        JsonNode ratesNode = jsonNode.get("rates");
+        JsonNode timestampJson = jsonNode.get("timestamp");
+        JsonNode rateNode = ratesNode.get(saving.getAsset().getCode());
+
+        double value = 1/rateNode.doubleValue();
+
+        long timestamp = Long.parseLong(timestampJson.asText());
+        long milliseconds = timestamp * 1000;
+        Date date = new Date(milliseconds);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateFormat.format(date);
+
+        return new SavingValueDto(
+                saving.getAsset().getName(),
+                saving.getAmount(),
+                saving.getAmount() * value,
+                value,
+                formattedDate);
     }
-
-    return savingValueDto;
+    return null;
   }
 
   public void addNewSaving(String savingJson, HttpServletRequest request) throws Exception {
