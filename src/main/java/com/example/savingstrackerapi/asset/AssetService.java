@@ -14,11 +14,16 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.example.savingstrackerapi.asset.response.AssetResponseCurrency.*;
 @Service
@@ -58,7 +63,29 @@ public class AssetService {
   }
 
   public void seedCryptocurrencyData() {
+    String apiUrl = "https://api.coincap.io/v2/assets?limit=10";
+    ResponseEntity<String> responseCryptocurrency = restTemplate.getForEntity(apiUrl, String.class);
+    String responseBody = responseCryptocurrency.getBody();
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    JsonNode jsonNode = null;
+    try {
+      jsonNode = objectMapper.readTree(responseBody);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+    JsonNode dataArray = jsonNode.get("data");
+    for (JsonNode dataNode : dataArray) {
+      Asset asset = new Asset();
+      String id = dataNode.get("id").asText();
+      String symbol = dataNode.get("symbol").asText();
+
+      asset.setName(id);
+      asset.setCode(symbol);
+      asset.setAssetType(assetTypeRepository.findByName("cryptocurrency"));
+      assetRepository.save(asset);
+    }
   }
 
   public void seedPreciousMetalData() {
@@ -88,6 +115,8 @@ public class AssetService {
   }
 
   public List<AssetMonthValueDto> getMonthValue(String assetCode) {
+    ObjectMapper objectMapper = new ObjectMapper();
+
     Asset asset = assetRepository.findAssetByCode(assetCode);
     List<AssetMonthValueDto> assetMonthValueDto = new ArrayList<>();
     String currencyUrl;
@@ -121,14 +150,55 @@ public class AssetService {
 
         break;
       case "cryptocurrency":
+        AtomicReference<Double> USD = new AtomicReference<>((double) 4);
+        long currentMillis = System.currentTimeMillis();
+        Instant thirtyDaysAgo = Instant.ofEpochMilli(currentMillis).minus(30, ChronoUnit.DAYS);
+        long thirtyDaysAgoMillis = thirtyDaysAgo.toEpochMilli();
+        String cryptocurrencyApiUrl = "https://api.coincap.io/v2/assets/"+asset.getName()+"/history?interval=d1&start="+thirtyDaysAgoMillis+"&end="+currentMillis;
+        ResponseEntity<String> responseCryptocurrency = restTemplate.getForEntity(cryptocurrencyApiUrl, String.class);
+        String responseBodyCryptocurrency = responseCryptocurrency.getBody();
 
+        String usd_url = "http://api.nbp.pl/api/exchangerates/rates/c/usd/last/1/?format=json";
+        ResponseEntity<String> usdResp = restTemplate.getForEntity(usd_url, String.class);
+        String usdBody = usdResp.getBody();
+
+        try {
+          JsonNode usdNode = objectMapper.readTree(usdBody);
+          JsonNode usdRatesNode = usdNode.get("rates");
+          usdRatesNode.fields().forEachRemaining(entry -> {
+                    JsonNode usdValue = usdRatesNode.get("ask");
+                    USD.set(usdValue.asDouble());
+                  });
+
+
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+
+        JsonNode jsonNodeCryptocurrency = null;
+        try {
+          jsonNodeCryptocurrency = objectMapper.readTree(responseBodyCryptocurrency);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+        JsonNode dataArray = jsonNodeCryptocurrency.get("data");
+        double finalUSD = USD.get();
+        for (JsonNode dataNode : dataArray) {
+          JsonNode timestampJson = dataNode.get("time");
+          long timestamp = Long.parseLong(timestampJson.asText());
+          Date date = new Date(timestamp);
+          SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+          String formattedDate = dateFormat.format(date);
+
+          double value = dataNode.get("priceUsd").asDouble();
+
+          assetMonthValueDto.add(new AssetMonthValueDto(formattedDate, value* finalUSD));
+        }
         break;
       case "precious_metal":
         precious_metalUrl = "https://api.metalpriceapi.com/v1/timeframe?api_key=5ddd710cdf18ec77141a4d0b38f813bc&start_date="+formattedDatePast +"&end_date="+formattedDateCurrent+"&base=PLN"+"&currencies="+asset.getCode();
         ResponseEntity<String> responsePrecious_metal = restTemplate.getForEntity(precious_metalUrl, String.class);
         String responseBody = responsePrecious_metal.getBody();
-
-        ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode jsonNode = null;
         try {

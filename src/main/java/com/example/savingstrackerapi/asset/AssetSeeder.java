@@ -20,5 +20,6 @@ public class AssetSeeder implements ApplicationRunner {
   public void run(ApplicationArguments args) throws Exception {
     assetService.seedCurrencyData();
     assetService.seedPreciousMetalData();
+    assetService.seedCryptocurrencyData();
   }
 }
