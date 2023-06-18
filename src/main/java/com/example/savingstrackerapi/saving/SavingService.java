@@ -1,5 +1,6 @@
 package com.example.savingstrackerapi.saving;
 
+import com.example.savingstrackerapi.asset.Asset;
 import com.example.savingstrackerapi.asset.AssetRepository;
 import com.example.savingstrackerapi.asset.dto.AssetMonthValueDto;
 import com.example.savingstrackerapi.config.JwtService;
@@ -195,7 +196,9 @@ public class SavingService {
       } else {
         newSaving.setAmount(amount);
         newSaving.setUser(user);
-        newSaving.setAsset(assetRepository.findAssetByCode(asset));
+        Asset assetObject = assetRepository.findAssetByCode(asset);
+        if (assetObject == null){ throw new RuntimeException("Asset is not supported");}
+        newSaving.setAsset(assetObject);
 
         savingRepository.save(newSaving);
       }
