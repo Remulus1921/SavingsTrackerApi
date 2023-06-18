@@ -103,9 +103,15 @@ public class AssetService {
 
     Asset platyna = new Asset();
     platyna.setName("Platyna");
-    platyna.setCode("XPL");
+    platyna.setCode("XPT");
     platyna.setAssetType(assetTypeRepository.findByName("precious_metal"));
     assetRepository.save(platyna);
+
+    Asset pallad = new Asset();
+    pallad.setName("Pallad");
+    pallad.setCode("XPD");
+    pallad.setAssetType(assetTypeRepository.findByName("precious_metal"));
+    assetRepository.save(pallad);
   }
 
   public List<AssetDto> getAssets(String type) {
