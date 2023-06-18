@@ -32,7 +32,6 @@ import static com.example.savingstrackerapi.asset.response.AssetMonthResponseCur
 @Service
 public class SavingService {
   private final SavingRepository savingRepository;
-  private final SavingDtoMapper savingDtoMapper;
   private final AssetRepository assetRepository;
   private final UserRepository userRepository;
   private final JwtService jwtService;
@@ -40,13 +39,11 @@ public class SavingService {
 
   @Autowired
   public SavingService(SavingRepository savingRepository,
-                       SavingDtoMapper savingDtoMapper,
                        AssetRepository assetRepository,
                        UserRepository userRepository,
                        JwtService jwtService,
                        RestTemplate restTemplate) {
     this.savingRepository = savingRepository;
-    this.savingDtoMapper = savingDtoMapper;
     this.assetRepository = assetRepository;
     this.userRepository = userRepository;
     this.jwtService = jwtService;
@@ -55,29 +52,39 @@ public class SavingService {
 
   public List<SavingDto> getUserSavings(HttpServletRequest request) {
     String userEmail = extractEmail(request);
-    List<SavingDto> savings = new ArrayList<>();
+    List<Saving> savings = new ArrayList<>();
+    List<SavingDto> savingsDto = new ArrayList<>();
     User user = this.userRepository.findByEmail(userEmail).orElse(null);
 
     if (user != null)
     {
-      savings = user.getSavingList()
-              .stream().map(savingDtoMapper)
-              .toList();
+      savings = user.getSavingList();
+      for (var saving:
+           savings) {
+          SavingValueDto savingValue = getSavingValue(saving);
+          SavingDto savingDto = new SavingDto(saving.getAmount(),saving.getAsset().getName(),saving.getAsset().getCode(),savingValue.value(),savingValue.exchangeRate());
+        savingsDto.add(savingDto);
+      }
+
     }
 
-    return savings;
+    return savingsDto;
   }
 
-  public SavingValueDto getSavingValue(String assetName, HttpServletRequest request) {
+  public SavingValueDto getSavingValueRequest(String assetName, HttpServletRequest request) {
     String userEmail = extractEmail(request);
     User user = this.userRepository.findByEmail(userEmail).orElseThrow();
-    String url;
-    String precious_metalUrl;
     Saving saving = user.getSavingList()
             .stream()
             .filter(s -> s.getAsset().getCode().equals(assetName))
             .findFirst()
             .orElseThrow();
+    return getSavingValue(saving);
+  }
+
+  public SavingValueDto getSavingValue(Saving saving) {
+    String url;
+    String precious_metalUrl;
     ObjectMapper objectMapper = new ObjectMapper();
 
     switch (saving.getAsset().getAssetType().getName()) {

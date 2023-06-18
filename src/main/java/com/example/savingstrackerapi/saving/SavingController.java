@@ -25,7 +25,7 @@ public class SavingController {
 
   @GetMapping("{assetCode}")
   public SavingValueDto getSavingValue(@PathVariable("assetCode") String assetName, HttpServletRequest request) {
-    return savingService.getSavingValue(assetName, request);
+    return savingService.getSavingValueRequest(assetName, request);
   }
 
   @PostMapping

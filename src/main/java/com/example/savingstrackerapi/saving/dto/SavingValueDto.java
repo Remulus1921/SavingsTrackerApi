@@ -14,4 +14,13 @@ public record SavingValueDto (
         Double exchangeRate,
         String date
 ){
+        @Override
+        public Double value() {
+                return value;
+        }
+
+        @Override
+        public Double exchangeRate() {
+                return exchangeRate;
+        }
 }
