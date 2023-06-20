@@ -147,7 +147,7 @@ public class SavingService {
                 valueCrypto,
                 formattedDateCrypto);
       case "precious_metal":
-        precious_metalUrl = "https://api.metalpriceapi.com/v1/latest?api_key=5ddd710cdf18ec77141a4d0b38f813bc&base=PLN&currencies="+saving.getAsset().getCode();
+        precious_metalUrl = "https://api.metalpriceapi.com/v1/latest?api_key=c1be1a1b4aafc7110155ccddcf954005&base=PLN&currencies="+saving.getAsset().getCode();
         ResponseEntity<String> responsePrecious_metal = restTemplate.getForEntity(precious_metalUrl, String.class);
         String responseBody = responsePrecious_metal.getBody();
         JsonNode jsonNode = null;

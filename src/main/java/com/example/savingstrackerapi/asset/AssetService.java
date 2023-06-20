@@ -202,7 +202,7 @@ public class AssetService {
         }
         break;
       case "precious_metal":
-        precious_metalUrl = "https://api.metalpriceapi.com/v1/timeframe?api_key=5ddd710cdf18ec77141a4d0b38f813bc&start_date="+formattedDatePast +"&end_date="+formattedDateCurrent+"&base=PLN"+"&currencies="+asset.getCode();
+        precious_metalUrl = "https://api.metalpriceapi.com/v1/timeframe?api_key=c1be1a1b4aafc7110155ccddcf954005&start_date="+formattedDatePast +"&end_date="+formattedDateCurrent+"&base=PLN"+"&currencies="+asset.getCode();
         ResponseEntity<String> responsePrecious_metal = restTemplate.getForEntity(precious_metalUrl, String.class);
         String responseBody = responsePrecious_metal.getBody();
 
