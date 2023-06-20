@@ -3,20 +3,18 @@ package com.example.savingstrackerapi.asset;
 import com.example.savingstrackerapi.assetType.AssetType;
 import com.example.savingstrackerapi.saving.Saving;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "assets")
+@Getter
+@Setter
 public class Asset {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

@@ -10,6 +10,7 @@ import com.example.savingstrackerapi.user.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -161,16 +162,21 @@ public class SavingService {
     }
   }
 
+  @Transactional(value = Transactional.TxType.REQUIRES_NEW)
   public void deleteSaving(String assetCode, HttpServletRequest request) {
     String userEmail = extractEmail(request);
     User user = this.userRepository.findByEmail(userEmail).orElseThrow();
 
-    Saving savingToDelete = user.getSavingList()
+    List<Saving> savings = user.getSavingList();
+
+    Saving savingToDelete = savings
             .stream()
             .filter(saving -> saving.getAsset().getCode().equals(assetCode.toUpperCase()))
             .findFirst().orElseThrow();
 
-    savingRepository.delete(savingToDelete);
+    savings.remove(savingToDelete);
+
+    savingRepository.deleteById(savingToDelete.getId());
   }
 
   private String extractEmail(HttpServletRequest request) {
